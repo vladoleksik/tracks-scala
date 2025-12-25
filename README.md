@@ -79,6 +79,20 @@ The solver applies a set of inference rules that examine each cell and its neigh
 
 When inference can no longer deduce new information, the solver makes a controlled guess — choosing a possible state for an uncertain cell.
 
+Guessing can use two strategies:
+- **Least possible options**: Has potential to use heuristics to minimize branching. Still, definition of *possible* is tricky — in the end, there is always only one "possible" state — the correct one.
+- **Continuous path**: Chooses cells that are adjacent to already known track segments, to maintain connectivity.
+
+Our solver uses the second strategy, as it allows for more aggressive pruning through connectivity constraints.
+
+For transparency, guessing for a cell takes place in this order:
+1. `║`
+2. `╔`
+3. `╚`
+4. `╗`
+5. `╝`
+6. `═`
+
 ### Validation
 Before proceeding, the solver rejects boards whose row/column hints are already violated or that have other implied contradictions.
 
@@ -113,6 +127,7 @@ Future improvements include:
 - **AdjacencyRule**: Uncertain cells adjacent to known tracks become filled.  
 - **OnlyTwoGoodNeighboursRule**: A filled cell with two valid neighbors must connect to them.  
 - **NoTracksRemainingRule** / **OnlyTracksRemainingRule**: Row/column pruning based on remaining capacity.
+
 Additional, more complex rules were used than in the case of the [Prolog solver](https://github.com/vladoleksik/tracks-prolog), achieving significant, scalable performance improvements on larger puzzles:
 - **RemoteAreaRule**: Isolated areas without endpoints cannot contain tracks.
 
@@ -120,6 +135,7 @@ Additional, more complex rules were used than in the case of the [Prolog solver]
 - **NoLoopsConstraint**: Completed track must be non-looping.  
 - **MoreTracksThanPossibleConstraint**: Rejects any axis exceeding its hint.  
 - **No contradictions**: Multiple conflicting deductions invalidate a branch.
+
 As for the inference rules, the constraints were expanded and refined to improve pruning effectiveness:
 - **NoThreesomesConstraint**: No cell may connect to three or more track segments.
 - **OffByOneConstraint**: No border row/column may be off by one from its hint with no other known cells. (For parity reasons, this will be impossible to later complete.)
